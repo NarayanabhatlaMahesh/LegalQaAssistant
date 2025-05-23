@@ -2,17 +2,22 @@ from llama_index.core import SimpleDirectoryReader
 print("SimpleDirectoryReader...")
 from llama_index.core.node_parser import  SentenceSplitter
 print("SentenceSplitter...")
-from llama_index.vector_stores.milvus import MilvusVectorStore
-print("MilvusVectorStore...")
-from pymilvus import MilvusClient
-print("MilvusClient...")
 import qdrant_client
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from llama_index.embeddings.fastembed import FastEmbedEmbedding
 from llama_index.core import VectorStoreIndex
 from llama_index.core import StorageContext, Settings
 print("VectorStoreIndex...")
-Settings.llm = None
+from llama_index.llms.huggingface import HuggingFaceLLM
+
+Settings.llm = HuggingFaceLLM(
+    model_name="tiiuae/falcon-7b-instruct",  # or "mistralai/Mistral-7B-Instruct-v0.1"
+    tokenizer_name="tiiuae/falcon-7b-instruct",
+    context_window=2048,
+    max_new_tokens=256,
+    generate_kwargs={"temperature": 0.5, "top_k": 50, "top_p": 0.95},
+    device_map="auto",
+)
 Settings.chunk_size = 512
 Settings.chunk_overlap = 20
 print("Settings changed...")
@@ -71,5 +76,5 @@ print("Query engine created...")
 response = query_engine.query("Under what circumstances will a court grant a quia timet injunction, and what evidentiary standards must an applicant satisfy to justify such equitable relief?")
 print("Query response:", response)
 
-vector_store.persist('./IndexStore')
+vector_store.persist('./IndexStore/qdrantstore.db')
 print("Vector store persisted...")
